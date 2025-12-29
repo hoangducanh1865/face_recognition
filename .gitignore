@@ -211,3 +211,5 @@ debug/
 tmp/
 data/
 data.zip
+checkpoints_backup
+siamesemodelv2.keras

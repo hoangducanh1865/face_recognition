@@ -1,0 +1,11 @@
+# Face Recognition - Siamese Network
+# Requirements
+
+# Core dependencies
+tensorflow>=2.16.0
+numpy>=1.24.0
+opencv-python>=4.8.0
+matplotlib>=3.7.0
+
+# Optional - for Kivy GUI app
+# kivy>=2.2.0
