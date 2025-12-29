@@ -89,8 +89,8 @@ class Config:
             pos_path=os.path.join(data_path, "positive"),
             neg_path=os.path.join(data_path, "negative"),
             anc_path=os.path.join(data_path, "anchor"),
-            model_path=os.path.join(working_path, "siamesemodelv2.keras"),
-            checkpoint_dir=os.path.join(working_path, "training_checkpoints"),
+            model_path=os.path.join(working_path, "models", "siamesemodelv2.keras"),
+            checkpoint_dir=os.path.join(working_path, "models", "checkpoints"),
             application_data_path=os.path.join(working_path, "application_data"),
             verification_images_path=os.path.join(
                 working_path, "application_data", "verification_images"
@@ -111,8 +111,8 @@ class Config:
             pos_path=os.path.join(data_path, "positive"),
             neg_path=os.path.join(data_path, "negative"),
             anc_path=os.path.join(data_path, "anchor"),
-            model_path=os.path.join(base_dir, "siamesemodelv2.keras"),
-            checkpoint_dir=os.path.join(base_dir, "checkpoints_backup"),
+            model_path=os.path.join(base_dir, "models", "siamesemodelv2.keras"),
+            checkpoint_dir=os.path.join(base_dir, "models", "checkpoints"),
             application_data_path=os.path.join(base_dir, "application_data"),
             verification_images_path=os.path.join(
                 base_dir, "application_data", "verification_images"

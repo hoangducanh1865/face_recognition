@@ -150,7 +150,7 @@ def export_model_for_download(
 
     # Export checkpoints
     if os.path.exists(checkpoint_dir):
-        checkpoint_zip = os.path.join(output_dir, "checkpoints_backup")
+        checkpoint_zip = os.path.join(output_dir, "checkpoints")
         shutil.make_archive(checkpoint_zip, "zip", checkpoint_dir)
         result["checkpoints"] = checkpoint_zip + ".zip"
         print(f"Checkpoints exported: {result['checkpoints']}")

@@ -209,7 +209,8 @@ __marimo__/
 .DS_Store
 debug/
 tmp/
-data/
+data/*/*
 data.zip
-checkpoints_backup
+checkpoints
 siamesemodelv2.keras
+lfw/
