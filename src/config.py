@@ -123,15 +123,22 @@ class Config:
     def create_directories(self) -> None:
         """Create necessary directories if they don't exist."""
         directories = [
-            self.paths.data_path,
-            self.paths.pos_path,
-            self.paths.neg_path,
-            self.paths.anc_path,
             self.paths.checkpoint_dir,
             self.paths.application_data_path,
             self.paths.verification_images_path,
             self.paths.input_image_path,
         ]
+
+        # Only create data directories if not in Kaggle (where input is read-only)
+        if self.environment != Environment.KAGGLE:
+            directories.extend(
+                [
+                    self.paths.data_path,
+                    self.paths.pos_path,
+                    self.paths.neg_path,
+                    self.paths.anc_path,
+                ]
+            )
 
         for directory in directories:
             os.makedirs(directory, exist_ok=True)
