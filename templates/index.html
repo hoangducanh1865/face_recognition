@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Recognition Access Control</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">
+                    <i class="fas fa-user-shield text-blue-600 mr-3"></i>Face Access Control
+                </h1>
+                <p class="text-gray-600 mt-2">Real-time monitoring and verification</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="bg-white px-4 py-2 rounded-lg shadow-sm flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+                    <span class="text-sm font-medium text-gray-700">System Online</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Camera Feed -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="p-4 border-b border-gray-100 flex justify-between items-center">
+                        <h2 class="font-semibold text-gray-700">Live Camera Feed</h2>
+                        <span class="bg-red-100 text-red-600 text-xs px-2 py-1 rounded font-medium">LIVE</span>
+                    </div>
+                    <div class="relative aspect-video bg-black">
+                        <img src="/video_feed" class="w-full h-full object-contain" alt="Camera Feed">
+                        
+                        <!-- Overlay for detection (optional) -->
+                        <div id="detection-overlay" class="absolute inset-0 pointer-events-none"></div>
+                    </div>
+                    <div class="p-4 bg-gray-50 flex justify-between items-center">
+                        <div class="text-sm text-gray-500">
+                            Camera: <span class="font-medium text-gray-900">Main Entrance</span>
+                        </div>
+                        <button onclick="verifyFace()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
+                            <i class="fas fa-camera"></i> Verify Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Recent Access & Status -->
+            <div class="space-y-6">
+                <!-- Last Verification Result -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="p-4 border-b border-gray-100">
+                        <h2 class="font-semibold text-gray-700">Verification Result</h2>
+                    </div>
+                    <div id="result-container" class="p-6 text-center">
+                        <div class="w-20 h-20 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-user text-gray-400 text-3xl"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900">Waiting for input...</h3>
+                        <p class="text-gray-500 text-sm mt-1">Click "Verify Now" to check access</p>
+                    </div>
+                </div>
+
+                <!-- Recent Logs -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="p-4 border-b border-gray-100">
+                        <h2 class="font-semibold text-gray-700">Recent Activity</h2>
+                    </div>
+                    <div class="divide-y divide-gray-100 max-h-[400px] overflow-y-auto" id="activity-log">
+                        <!-- Logs will be inserted here -->
+                        <div class="p-4 text-center text-gray-500 text-sm">No recent activity</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function verifyFace() {
+            const btn = document.querySelector('button[onclick="verifyFace()"]');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+
+            try {
+                const response = await fetch('/verify', { method: 'POST' });
+                const data = await response.json();
+                
+                updateResult(data);
+                if (data.success && data.match) {
+                    addLog(data.user, true);
+                } else if (data.success && !data.match) {
+                    addLog({ name: 'Unknown', userId: '---' }, false);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Verification failed. Check console for details.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        function updateResult(data) {
+            const container = document.getElementById('result-container');
+            
+            if (!data.success) {
+                container.innerHTML = `
+                    <div class="w-20 h-20 bg-red-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-exclamation-triangle text-red-500 text-3xl"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-red-600">Error</h3>
+                    <p class="text-gray-500 text-sm mt-1">${data.error || 'Unknown error'}</p>
+                `;
+                return;
+            }
+
+            if (data.match) {
+                container.innerHTML = `
+                    <div class="w-20 h-20 bg-green-100 rounded-full mx-auto mb-4 flex items-center justify-center animate-bounce">
+                        <i class="fas fa-check text-green-500 text-3xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-green-600">Access Granted</h3>
+                    <p class="text-gray-900 font-medium mt-2 text-xl">${data.user.name}</p>
+                    <p class="text-gray-500 text-sm">ID: ${data.user.userId}</p>
+                    <div class="mt-3 inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-medium">
+                        Score: ${(data.score * 100).toFixed(1)}%
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="w-20 h-20 bg-red-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-times text-red-500 text-3xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-red-600">Access Denied</h3>
+                    <p class="text-gray-900 font-medium mt-2">Unknown Person</p>
+                    <p class="text-gray-500 text-sm">No match found</p>
+                `;
+            }
+        }
+
+        function addLog(user, success) {
+            const logContainer = document.getElementById('activity-log');
+            const time = new Date().toLocaleTimeString();
+            
+            const html = `
+                <div class="p-4 hover:bg-gray-50 transition-colors flex items-center justify-between animate-fade-in">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full ${success ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'} flex items-center justify-center">
+                            <i class="fas ${success ? 'fa-user-check' : 'fa-user-times'}"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900">${user.name}</p>
+                            <p class="text-xs text-gray-500">${time} • ${user.userId}</p>
+                        </div>
+                    </div>
+                    <span class="text-xs font-medium px-2 py-1 rounded ${success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                        ${success ? 'GRANTED' : 'DENIED'}
+                    </span>
+                </div>
+            `;
+            
+            // Remove "No recent activity" if present
+            if (logContainer.children.length === 1 && logContainer.children[0].innerText === 'No recent activity') {
+                logContainer.innerHTML = '';
+            }
+            
+            logContainer.insertAdjacentHTML('afterbegin', html);
+        }
+    </script>
+    <style>
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.3s ease-out forwards;
+        }
+    </style>
+</body>
+</html>

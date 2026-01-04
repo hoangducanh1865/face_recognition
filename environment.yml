@@ -10,4 +10,8 @@ dependencies:
       - opencv-python
       - matplotlib
       - numpy
+      - fastapi
+      - uvicorn
+      - httpx
+      - python-multipart
       - kivy
